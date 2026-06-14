@@ -4,6 +4,7 @@ import {
 	useMemo,
 	useEffect,
 	useCallback,
+	useState,
 } from "react";
 
 import type { ReactNode } from "react";
@@ -13,7 +14,7 @@ import { loadCart, saveCart } from "../services/cartStorage";
 
 import type { CartContextValue } from "./cartContext.types";
 import type { CartItem } from "../types/cart";
-
+import { addToCartApi, updateCartApi } from "../api/cartApi";
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 interface Props {
@@ -22,7 +23,8 @@ interface Props {
 
 export function CartProvider({ children }: Props) {
 	const [state, dispatch] = useReducer(cartReducer, undefined, loadCart);
-
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 	// persist cart
 	useEffect(() => {
 		saveCart(state);
@@ -47,32 +49,43 @@ export function CartProvider({ children }: Props) {
 				0,
 			),
 
-			addItem: (item) => {
-				const existing = state.items.find(
-					(i) => i.variant.id === item.variant.id,
-				);
+			addItem: async (item) => {
+				try {
+					setLoading(true);
+					setError(null);
 
-				const currentQty = existing?.quantity ?? 0;
+					await addToCartApi(item);
 
-				const maxStock = item.variant.stock;
+					const existing = state.items.find(
+						(i) => i.variant.id === item.variant.id,
+					);
 
-				const nextQty = currentQty + item.quantity;
+					const currentQty = existing?.quantity ?? 0;
+					const maxStock = item.variant.stock;
 
-				if (nextQty > maxStock) {
+					const nextQty = currentQty + item.quantity;
+
+					if (nextQty > maxStock) {
+						dispatch({
+							type: "UPDATE_QUANTITY",
+							payload: {
+								cartItemId: item.cartItemId,
+								quantity: maxStock,
+							},
+						});
+						return;
+					}
+
 					dispatch({
-						type: "UPDATE_QUANTITY",
-						payload: {
-							cartItemId: item.cartItemId,
-							quantity: maxStock,
-						},
+						type: "ADD_ITEM",
+						payload: item,
 					});
-					return;
+				} catch (err) {
+					setError(err instanceof Error ? err.message : "Something went wrong");
+					throw err; // important for UI handling
+				} finally {
+					setLoading(false);
 				}
-
-				dispatch({
-					type: "ADD_ITEM",
-					payload: item,
-				});
 			},
 
 			removeItem: (cartItemId) =>
@@ -81,14 +94,30 @@ export function CartProvider({ children }: Props) {
 					payload: cartItemId,
 				}),
 
-			updateQuantity: (cartItemId, quantity) =>
-				dispatch({
-					type: "UPDATE_QUANTITY",
-					payload: {
-						cartItemId,
-						quantity: Math.max(1, quantity),
-					},
-				}),
+			updateQuantity: async (cartItemId, quantity) => {
+				try {
+					setLoading(true);
+					setError(null);
+
+					await updateCartApi();
+
+					dispatch({
+						type: "UPDATE_QUANTITY",
+						payload: {
+							cartItemId,
+							quantity: Math.max(1, quantity),
+						},
+					});
+				} catch (err) {
+					setError(
+						err instanceof Error ? err.message : "Failed to update cart",
+					);
+
+					throw err;
+				} finally {
+					setLoading(false);
+				}
+			},
 
 			clearCart: () =>
 				dispatch({
@@ -96,6 +125,8 @@ export function CartProvider({ children }: Props) {
 				}),
 
 			getItemByProductId,
+			loading,
+			error,
 		}),
 		[state.items, getItemByProductId],
 	);

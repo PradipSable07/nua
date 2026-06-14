@@ -5,15 +5,17 @@ import type { Product } from "../../types/product";
 import { useCart } from "../../hooks/useCart";
 
 import styles from "./ProductCard.module.scss";
+import { useState } from "react";
 
 interface Props {
 	product: Product;
 }
 
 function ProductCard({ product }: Props) {
+	const [loading, setLoading] = useState(false);
 	const { addItem, updateQuantity, getItemByProductId, removeItem } = useCart();
-	const defaultVariant = product.variants?.[0];
 
+	const defaultVariant = product.variants?.[0];
 	const cartItem = getItemByProductId(product.id);
 	const quantity = cartItem?.quantity || 0;
 	const stock = defaultVariant?.stock ?? 0;
@@ -21,22 +23,28 @@ function ProductCard({ product }: Props) {
 	const isOutOfStock = stock === 0;
 
 	const isMaxedOut = quantity >= stock;
-	const handleAdd = () => {
+	const handleAdd = async () => {
 		const defaultVariant = product.variants?.[0];
 
-		if (!defaultVariant) return;
+		if (!defaultVariant || defaultVariant.stock === 0) return;
 
-		if (defaultVariant.stock === 0) return;
+		try {
+			setLoading(true);
 
-		addItem({
-			cartItemId: crypto.randomUUID(),
-			productId: product.id,
-			name: product.name,
-			image: product.images[0].url,
-			price: product.salePrice ?? product.price,
-			quantity: 1,
-			variant: defaultVariant,
-		});
+			await addItem({
+				cartItemId: crypto.randomUUID(),
+				productId: product.id,
+				name: product.name,
+				image: product.images[0].url,
+				price: product.salePrice ?? product.price,
+				quantity: 1,
+				variant: defaultVariant,
+			});
+		} catch (err) {
+			console.error("Add to cart failed", err);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	const increase = () => {
@@ -112,12 +120,14 @@ function ProductCard({ product }: Props) {
 						<button
 							className={styles.cta}
 							onClick={handleAdd}
-							disabled={isOutOfStock || isMaxedOut}>
-							{isOutOfStock
-								? "Sold Out"
-								: isMaxedOut
-									? "Max Reached"
-									: "Quick Add"}
+							disabled={isOutOfStock || isMaxedOut || loading}>
+							{loading
+								? "Adding..."
+								: isOutOfStock
+									? "Sold Out"
+									: isMaxedOut
+										? "Max Reached"
+										: "Quick Add"}
 						</button>
 					) : (
 						<div className={styles.qtyControl}>

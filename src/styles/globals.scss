@@ -1,27 +1,22 @@
 @use "./reset";
 @use "./variables" as *;
 
-
-
 * {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 body {
-  margin: 0;
-  font-family:
-    Inter,
-    system-ui,
-    sans-serif;
-  background: #fff;
-  color: $primary-color;
+	margin: 0;
+	font-family: Inter, system-ui, sans-serif;
+	background: $color-background;
+	color: $color-secondary;
 }
 
 img {
-  max-width: 100%;
-  display: block;
+	max-width: 100%;
+	display: block;
 }
 
 button {
-  cursor: pointer;
+	cursor: pointer;
 }

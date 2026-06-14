@@ -1,24 +1,18 @@
 import type { CartItem } from "../types/cart";
 
 export interface CartContextValue {
-  items: CartItem[];
+	items: CartItem[];
 
-  totalItems: number;
+	totalItems: number;
 
-  subtotal: number;
+	subtotal: number;
 
-  addItem: (
-    item: CartItem
-  ) => void;
+	addItem: (item: CartItem) => void;
 
-  removeItem: (
-    cartItemId: string
-  ) => void;
+	removeItem: (cartItemId: string) => void;
 
-  updateQuantity: (
-    cartItemId: string,
-    quantity: number
-  ) => void;
+	updateQuantity: (cartItemId: string, quantity: number) => void;
 
-  clearCart: () => void;
+	clearCart: () => void;
+	getItemByProductId: (productId: number) => CartItem | undefined;
 }

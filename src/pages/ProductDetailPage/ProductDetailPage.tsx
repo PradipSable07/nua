@@ -16,7 +16,31 @@ import type { Product, ProductVariant } from "../../types/product";
 import { useSearchParams } from "react-router-dom";
 
 import styles from "./ProductDetailPage.module.scss";
+function resolveVariant(
+	product: Product,
+	color: string | null,
+	size: string | null,
+) {
+	if (!product.variants.length) return null;
 
+	// 1. try exact match
+	let variant = product.variants.find(
+		(v) => v.color === color && v.size === size,
+	);
+
+	// 2. fallback: same color, first available size
+	if (!variant && color) {
+		variant = product.variants.find((v) => v.color === color && v.stock > 0);
+	}
+
+	// 3. fallback: any available variant
+	if (!variant) {
+		variant = product.variants.find((v) => v.stock > 0);
+	}
+
+	// 4. last fallback: first variant
+	return variant ?? product.variants[0];
+}
 function ProductDetailPage() {
 	const { id } = useParams();
 	const [searchParams, setSearchParams] = useSearchParams();
@@ -62,18 +86,14 @@ function ProductDetailPage() {
 		}
 
 		const urlColor = searchParams.get("color");
-
 		const urlSize = searchParams.get("size");
 
-		const matchingVariant = product.variants.find(
-			(variant) => variant.color === urlColor && variant.size === urlSize,
-		);
+		const safeVariant = resolveVariant(product, urlColor, urlSize);
 
-		const defaultVariant = matchingVariant ?? product.variants[0];
+		if (!safeVariant) return;
 
-		setSelectedColor(defaultVariant.color);
-
-		setSelectedSize(defaultVariant.size);
+		setSelectedColor(safeVariant?.color ?? "");
+		setSelectedSize(safeVariant?.size ?? "");
 	}, [product]);
 
 	useEffect(() => {
@@ -93,38 +113,37 @@ function ProductDetailPage() {
 			return;
 		}
 
-		setSearchParams({
-			color: selectedColor,
-			size: selectedSize,
-		});
-	}, [selectedColor, selectedSize, searchParams, setSearchParams]);
-
-	const selectedVariant = product?.variants.find(
-		(variant) =>
-			variant.color === selectedColor && variant.size === selectedSize,
-	);
+		setSearchParams(
+			{
+				color: selectedColor,
+				size: selectedSize,
+			},
+			{ replace: true },
+		);
+	}, [selectedColor, selectedSize]);
 
 	const activeVariant = useMemo<ProductVariant | null>(() => {
-		if (!product) {
-			return null;
+		if (!product) return null;
+
+		if (product.type !== "fashion") {
+			return {
+				id: `${product.id}-default`,
+				color: "",
+				size: "",
+				stock: 99,
+			};
 		}
 
-		if (product.type === "fashion") {
-			return selectedVariant ?? null;
-		}
+		return resolveVariant(product, selectedColor, selectedSize);
+	}, [product, selectedColor, selectedSize]);
 
-		return {
-			id: `${product.id}-default`,
-			color: "",
-			size: "",
-			stock: 99,
-		};
-	}, [product, selectedVariant]);
+	const existingQuantity = useMemo(() => {
+		if (!activeVariant) return 0;
 
-	const existingQuantity = items
-		.filter((item) => item.cartItemId === activeVariant?.id)
-		.reduce((total, item) => total + item.quantity, 0);
-
+		return items
+			.filter((item) => item.variant.id === activeVariant.id)
+			.reduce((sum, item) => sum + item.quantity, 0);
+	}, [items, activeVariant]);
 	const handleAddToCart = () => {
 		if (!product || !activeVariant) {
 			return;

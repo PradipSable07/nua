@@ -1,11 +1,14 @@
+import React from "react";
 import { render } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { CartProvider } from "../context/CartContext";
 
-export function renderWithProviders(ui: React.ReactNode) {
+export function renderWithProviders(ui: React.ReactElement) {
   return render(
-    <MemoryRouter>
-      <CartProvider>{ui}</CartProvider>
-    </MemoryRouter>
+    <BrowserRouter>
+      <CartProvider>
+        {ui}
+      </CartProvider>
+    </BrowserRouter>
   );
 }

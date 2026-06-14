@@ -1,0 +1,92 @@
+@use "../../styles/variables" as *;
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.grid {
+  max-width: $container-width;
+
+  margin: 0 auto;
+
+  padding: 80px 24px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(280px, 1fr)
+    );
+
+  gap: 32px;
+}
+
+.card {
+  padding: 20px;
+
+  border-radius: $radius-lg;
+
+  background: white;
+}
+
+.image,
+.brand,
+.title,
+.price,
+.button {
+  background: linear-gradient(
+    90deg,
+    #f3f4f6 25%,
+    #e5e7eb 50%,
+    #f3f4f6 75%
+  );
+
+  background-size: 1000px 100%;
+
+  animation:
+    shimmer 1.5s infinite linear;
+}
+
+.image {
+  aspect-ratio: 1;
+
+  border-radius: $radius-md;
+
+  margin-bottom: 16px;
+}
+
+.brand {
+  height: 12px;
+  width: 40%;
+
+  margin-bottom: 12px;
+}
+
+.title {
+  height: 16px;
+
+  width: 80%;
+
+  margin-bottom: 16px;
+}
+
+.price {
+  height: 18px;
+
+  width: 50%;
+
+  margin-bottom: 20px;
+}
+
+.button {
+  height: 44px;
+
+  border-radius: $radius-md;
+}

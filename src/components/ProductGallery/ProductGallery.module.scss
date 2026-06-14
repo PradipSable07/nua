@@ -1,0 +1,80 @@
+@use "../../styles/variables" as *;
+
+.gallery {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 16px;
+}
+
+.mainImage {
+  background: $color-surface;
+
+  border-radius: $radius-lg;
+
+  overflow: hidden;
+
+  aspect-ratio: 1;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    padding: 40px;
+  }
+}
+
+.thumbnails {
+  display: flex;
+
+  gap: 12px;
+
+  overflow-x: auto;
+
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.thumbnail {
+  width: 90px;
+  height: 90px;
+
+  flex-shrink: 0;
+
+  border: 2px solid transparent;
+
+  border-radius: $radius-md;
+
+  background: $color-surface;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  transition: all 0.2s ease;
+
+  img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    padding: 8px;
+  }
+}
+
+.active {
+  border-color: $color-primary;
+}

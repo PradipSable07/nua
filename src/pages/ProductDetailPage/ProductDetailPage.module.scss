@@ -1,0 +1,126 @@
+@use "../../styles/variables" as *;
+
+.page {
+  max-width: $container-width;
+
+  margin: 0 auto;
+
+  padding: 48px 24px;
+
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 64px;
+}
+
+.gallerySection {
+  min-height: 650px;
+}
+
+.infoSection {
+  display: flex;
+
+  flex-direction: column;
+}
+
+.brand {
+  color: $color-secondary;
+
+  text-transform: uppercase;
+
+  letter-spacing: 1px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: 40px;
+
+  line-height: 1.2;
+
+  margin-bottom: 20px;
+}
+
+.priceContainer {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  margin-bottom: 24px;
+}
+
+.salePrice,
+.price {
+  font-size: 32px;
+
+  font-weight: 700;
+}
+
+.originalPrice {
+  color: $color-secondary;
+
+  text-decoration: line-through;
+}
+
+.description {
+  line-height: 1.8;
+
+  color: $color-secondary;
+}
+
+.divider {
+  margin: 32px 0;
+
+  height: 1px;
+
+  background: $color-border;
+}
+
+.variantContainer {
+  margin-bottom: 24px;
+}
+
+.quantityContainer {
+  margin-bottom: 24px;
+}
+
+.addToCart {
+  height: 56px;
+
+  border: none;
+
+  border-radius: $radius-md;
+
+  background: $color-primary;
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+@media (max-width: $mobile) {
+  .page {
+    grid-template-columns: 1fr;
+
+    gap: 32px;
+  }
+
+  .gallerySection {
+    min-height: auto;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+}

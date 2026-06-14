@@ -1,62 +1,43 @@
 import { Link } from "react-router-dom";
-import {
-  FiShoppingCart,
-  FiMenu,
-} from "react-icons/fi";
+import { FiShoppingCart, FiMenu } from "react-icons/fi";
 
 import { useCart } from "../../hooks/useCart";
 
 import styles from "./Navbar.module.scss";
+import { useUI } from "../../hooks/useUI";
 
 function Navbar() {
-  const { totalItems } = useCart();
+	const { totalItems } = useCart();
 
-  return (
-    <header className={styles.header}>
-      <div className={styles.container}>
-        <button
-          className={styles.mobileMenu}
-        >
-          <FiMenu />
-        </button>
+	const { openCart } = useUI();
 
-        <Link
-          to="/"
-          className={styles.logo}
-        >
-          NUA
-        </Link>
+	return (
+		<header className={styles.header}>
+			<div className={styles.container}>
+				<button className={styles.mobileMenu}>
+					<FiMenu />
+				</button>
 
-        <nav className={styles.navigation}>
-          <Link to="/">
-            Shop
-          </Link>
+				<Link to='/' className={styles.logo}>
+					NUA
+				</Link>
 
-          <Link to="/">
-            Categories
-          </Link>
+				<nav className={styles.navigation}>
+					<Link to='/'>Shop</Link>
 
-          <Link to="/">
-            New Arrivals
-          </Link>
-        </nav>
+					<Link to='/'>Categories</Link>
 
-        <button
-          className={styles.cartButton}
-        >
-          <FiShoppingCart />
+					<Link to='/'>New Arrivals</Link>
+				</nav>
 
-          {totalItems > 0 && (
-            <span
-              className={styles.badge}
-            >
-              {totalItems}
-            </span>
-          )}
-        </button>
-      </div>
-    </header>
-  );
+				<button className={styles.cartButton} onClick={openCart}>
+					<FiShoppingCart />
+
+					{totalItems > 0 && <span className={styles.badge}>{totalItems}</span>}
+				</button>
+			</div>
+		</header>
+	);
 }
 
 export default Navbar;

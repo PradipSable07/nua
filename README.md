@@ -1,104 +1,103 @@
-
 # 🛍️ NUA — Mini E-Commerce Web App
 
-A production-style mini e-commerce frontend built with **React 18 + TypeScript + Vite**, featuring product listing, variant selection, and a fully persistent cart system.
+A production-style frontend e-commerce application built with **React 18 + TypeScript + Vite**.  
+It demonstrates scalable frontend architecture, real-world cart logic, variant handling, and UI state management.
 
-This project focuses on real-world frontend architecture, scalable state management, and clean UI/UX implementation.
-
----
-
-## 🚀 Live Demo
-
-👉 [https://nua-eta.vercel.app/](https://nua-eta.vercel.app/)
+This project is designed as a **frontend engineering case study**, focusing on architecture, state modeling, and UX decisions.
 
 ---
 
-## 📦 Tech Stack
+##  Live Demo
 
-* React 18 + TypeScript
-* Vite (build tool)
-* React Router DOM
-* Context API (Cart + UI state)
-* SCSS Modules (no Tailwind / no CSS-in-JS)
-* Fake Store API → [https://fakestoreapi.com](https://fakestoreapi.com)
-* localStorage (cart persistence)
+ https://nua-eta.vercel.app/
 
 ---
 
-## 🧠 Key Features
+##  Tech Stack
 
-### 🛍 Product Listing
-
-* Responsive product grid
-* Product cards with image, name, price
-* Quick Add directly from listing
-* Real-time cart quantity updates
-
-### 📄 Product Detail Page
-
-* Image gallery with thumbnails
-* Variant selection (color + size)
-* Stock-aware UI (available / low stock / sold out)
-* Deep-linkable state via URL:
-
-  ```
-  /product/18?color=Black&size=S
-  ```
-
-### 🛒 Cart System
-
-* Slide-in cart drawer
-* Quantity update / remove items
-* Subtotal calculation
-* Persistent across refresh (localStorage)
-
-### 🎯 Smart UX
-
-* Prevents over-ordering based on stock
-* Shows “Add More (X in cart)” state
-* Auto-sync variant selection with URL
-* Disabled states for sold-out variants
+- React 18 + TypeScript
+- Vite (build tool)
+- React Router DOM
+- Context API + useReducer
+- SCSS Modules
+- LocalStorage persistence
+- Fake Store API
 
 ---
 
-## 📁 Project Structure
+##  Key Features
+
+### Product Listing
+- Responsive product grid
+- Quick Add from listing page
+- Real-time cart updates
+- Stock-aware UI states
+
+---
+
+###  Product Detail Page
+- Image gallery support
+- Variant selection (color + size)
+- URL-driven state management:
+```
+
+/product/18?color=Black&size=S
 
 ```
+- Safe fallback for invalid URLs
+
+---
+
+###  Cart System
+- Slide-in cart drawer
+- Quantity increase/decrease
+- Remove items
+- Persistent cart (localStorage)
+- Stock-safe cart logic
+
+---
+
+###  UX Enhancements
+- Prevents over-ordering based on stock
+- Dynamic button states:
+- Quick Add
+- Adding...
+- Sold Out
+- Max Reached
+- Low-stock indicators
+- Deep-linkable product state
+
+---
+
+##  Project Structure
+
+```
+
 src/
-├── api/                 # API layer (Fake Store)
-├── components/          # Reusable UI components
-├── context/             # Cart + UI global state
-├── hooks/               # Custom hooks (useCart, useUI)
-├── pages/               # Route-level pages
-├── router/              # App routing
-├── services/            # localStorage + transformers
-├── types/               # TypeScript models
-├── utils/               # helpers (stock, etc.)
-├── styles/              # global SCSS system
-```
+├── api/              # API layer
+├── components/       # UI components
+├── context/          # Global state (Cart)
+├── hooks/            # Custom hooks
+├── pages/            # Route pages
+├── router/           # Routing config
+├── services/         # storage + helpers
+├── types/            # TypeScript types
+├── utils/            # utility functions
+├── styles/           # global styles
+├── test/             # test utilities
+
+````
 
 ---
 
-## ⚙️ Setup & Installation
-
-### 1. Clone the repo
+##  Setup & Installation
 
 ```bash
 git clone https://github.com/your-username/nua-ecommerce.git
 cd nua-ecommerce
-```
-
-### 2. Install dependencies
-
-```bash
 npm install
-```
-
-### 3. Start development server
-
-```bash
 npm run dev
-```
+````
 
 App runs at:
 
@@ -108,115 +107,99 @@ http://localhost:5173
 
 ---
 
-## 🏗️ Build for Production
+##  Production Build
 
 ```bash
 npm run build
-```
-
-Preview build:
-
-```bash
 npm run preview
 ```
 
 ---
 
+##  Testing Strategy
+
+This project uses **Vitest + React Testing Library**.
+
+###  What is tested
+
+#### 1. Cart Reducer (Logic Layer)
+
+* Add item to cart
+* Update quantity
+* Remove item
+* Ensures stock-safe operations
+
+---
+
+#### 2. VariantSelector (UI Logic)
+
+* Disables sold-out sizes
+* Shows low-stock indicators
+* Validates variant selection behavior
+
+---
+
+#### 3. ProductCard (UI Behavior)
+
+* Renders product data correctly
+* Disables Quick Add when out of stock
+* Switches UI between:
+
+  * Quick Add
+  * Quantity controls
+
+---
+
 ## 🌐 Deployment (Vercel)
 
-This project is optimized for Vercel.
-
-### Steps:
-
-1. Push repo to GitHub
-2. Go to [https://vercel.com](https://vercel.com)
-3. Import repository
-4. Framework preset: **Vite**
-5. Build command:
+1. Push to GitHub
+2. Import into Vercel
+3. Framework preset: Vite
+4. Build command:
 
    ```
    npm run build
    ```
-6. Output directory:
+5. Output:
 
    ```
    dist
    ```
 
-This ensures React Router works on refresh.
+---
+
+##  Architecture Decisions
+
+See [`DECISIONS.md`](./DECISIONS.md)
 
 ---
 
-## 🧩 Design Decisions
+##  Trade-offs
 
-### 1. Context API instead of Redux
-
-Chosen for simplicity and readability. Cart logic is isolated and scalable enough for this scope.
-
-### 2. localStorage persistence
-
-Cart state persists across refresh without backend dependency.
-
-### 3. Variant model strategy
-
-Variants are pre-generated and resolved via:
-
-* color + size matching
-* fallback logic for invalid URL states
-
-### 4. Stock-aware UX
-
-Stock is enforced at UI level:
-
-* disables buttons
-* prevents over-add
-* shows low-stock warnings
-
----
-
-## ⚠️ Trade-offs
-
-* No backend → cart is purely client-side
-* Fake Store API has limited variant realism
+* No backend (client-only cart)
 * No authentication system
-* No server-side cart sync
+* Fake API has limited realism
+* No server-side validation
 
 ---
 
-## 🔮 Future Improvements
+##  Future Improvements
 
-If extended into a real production system:
-
-* Backend cart sync (Redis / DB)
-* User accounts + auth
-* Payment integration (Stripe)
-* Wishlist persistence
-* Inventory management system
-* Server-side rendering (Next.js migration)
+* Backend cart sync (Node/Redis/DB)
+* Authentication system
+* Stripe integration
+* Wishlist feature
+* MSW API mocking for tests
+* Move to Next.js for SSR
 
 ---
 
-## 🧪 Optional Enhancements (Not Implemented)
+##  Author
 
-* Unit tests for variant selector
-* Cart reducer testing
-* API failure simulation
-* Loading skeleton improvements
-
----
-
-## 📸 Screenshots
-
-*Add screenshots here*
-
----
-
-## 👨‍💻 Author
-
-Built as a frontend engineering exercise focusing on:
+Frontend engineering project focused on:
 
 * scalable React architecture
-* real-world UI state handling
+* state modeling with reducers
+* real-world UI behavior
 * production-level component design
 
----

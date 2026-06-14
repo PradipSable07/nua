@@ -3,6 +3,9 @@ export type StockStatus =
   | "low-stock"
   | "sold-out";
 
+  export type ProductType =
+  | "fashion"
+  | "generic";
 export interface ProductVariant {
   id: string;
   color: string;
@@ -17,10 +20,15 @@ export interface ProductImage {
 
 export interface Product {
   id: number;
+
   name: string;
+
   brand: string;
 
+  type: ProductType;
+
   price: number;
+
   salePrice?: number;
 
   description: string;

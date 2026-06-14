@@ -1,40 +1,45 @@
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-
-import Navbar from "../../components/Navbar/Navbar";
 
 import { getProduct } from "../../api/products";
 
-import { useEffect, useState } from "react";
-
-import type { Product } from "../../types/product";
-
-import LoadingSkeleton from "../../components/LoadingSkeleton/LoadingSkeleton";
-
-import EmptyState from "../../components/EmptyState/EmptyState";
-
-import styles from "./ProductDetailPage.module.scss";
+import Navbar from "../../components/Navbar/Navbar";
 import ProductGallery from "../../components/ProductGallery/ProductGallery";
 import VariantSelector from "../../components/VariantSelector/VariantSelector";
 import QuantityPicker from "../../components/QuantityPicker/QuantityPicker";
+import LoadingSkeleton from "../../components/LoadingSkeleton/LoadingSkeleton";
+import EmptyState from "../../components/EmptyState/EmptyState";
+
 import { useCart } from "../../hooks/useCart";
-const ProductDetailPage = () => {
+
+import type { Product, ProductVariant } from "../../types/product";
+import { useSearchParams } from "react-router-dom";
+
+import styles from "./ProductDetailPage.module.scss";
+
+function ProductDetailPage() {
 	const { id } = useParams();
+	const [searchParams, setSearchParams] = useSearchParams();
+
+	const { addItem, items } = useCart();
 
 	const [product, setProduct] = useState<Product | null>(null);
 
 	const [loading, setLoading] = useState(true);
 
 	const [error, setError] = useState("");
+
 	const [selectedColor, setSelectedColor] = useState("");
 
 	const [selectedSize, setSelectedSize] = useState("");
+
 	const [quantity, setQuantity] = useState(1);
 
-	const { addItem } = useCart();
 	useEffect(() => {
 		async function fetchProduct() {
 			try {
 				setLoading(true);
+				setError("");
 
 				const data = await getProduct(id!);
 
@@ -48,37 +53,85 @@ const ProductDetailPage = () => {
 
 		fetchProduct();
 	}, [id]);
+
 	useEffect(() => {
 		if (!product) return;
 
-		const firstVariant = product.variants[0];
+		if (product.type !== "fashion" || product.variants.length === 0) {
+			return;
+		}
 
-		setSelectedColor(firstVariant.color);
+		const urlColor = searchParams.get("color");
 
-		setSelectedSize(firstVariant.size);
+		const urlSize = searchParams.get("size");
+
+		const matchingVariant = product.variants.find(
+			(variant) => variant.color === urlColor && variant.size === urlSize,
+		);
+
+		const defaultVariant = matchingVariant ?? product.variants[0];
+
+		setSelectedColor(defaultVariant.color);
+
+		setSelectedSize(defaultVariant.size);
 	}, [product]);
+
+	useEffect(() => {
+		setQuantity(1);
+	}, [selectedColor, selectedSize]);
+
+	useEffect(() => {
+		if (!selectedColor || !selectedSize) {
+			return;
+		}
+
+		const currentColor = searchParams.get("color");
+
+		const currentSize = searchParams.get("size");
+
+		if (currentColor === selectedColor && currentSize === selectedSize) {
+			return;
+		}
+
+		setSearchParams({
+			color: selectedColor,
+			size: selectedSize,
+		});
+	}, [selectedColor, selectedSize, searchParams, setSearchParams]);
+
 	const selectedVariant = product?.variants.find(
 		(variant) =>
 			variant.color === selectedColor && variant.size === selectedSize,
 	);
 
-	useEffect(() => {
-		setQuantity(1);
-	}, [selectedColor, selectedSize]);
-	if (loading) {
-		return (
-			<>
-				<Navbar />
-				<LoadingSkeleton count={1} />
-			</>
-		);
-	}
+	const activeVariant = useMemo<ProductVariant | null>(() => {
+		if (!product) {
+			return null;
+		}
+
+		if (product.type === "fashion") {
+			return selectedVariant ?? null;
+		}
+
+		return {
+			id: `${product.id}-default`,
+			color: "",
+			size: "",
+			stock: 99,
+		};
+	}, [product, selectedVariant]);
+
+	const existingQuantity = items
+		.filter((item) => item.cartItemId === activeVariant?.id)
+		.reduce((total, item) => total + item.quantity, 0);
 
 	const handleAddToCart = () => {
-		if (!product || !selectedVariant) return;
+		if (!product || !activeVariant) {
+			return;
+		}
 
 		addItem({
-			cartItemId: selectedVariant.id,
+			cartItemId: activeVariant.id,
 
 			productId: product.id,
 
@@ -90,9 +143,20 @@ const ProductDetailPage = () => {
 
 			quantity,
 
-			variant: selectedVariant,
+			variant: activeVariant,
 		});
 	};
+
+	if (loading) {
+		return (
+			<>
+				<Navbar />
+
+				<LoadingSkeleton count={1} />
+			</>
+		);
+	}
+
 	if (error || !product) {
 		return (
 			<>
@@ -136,35 +200,48 @@ const ProductDetailPage = () => {
 
 					<div className={styles.divider} />
 
-					<div className={styles.variantContainer}>
-						<VariantSelector
-							variants={product.variants}
-							selectedColor={selectedColor}
-							selectedSize={selectedSize}
-							onColorChange={setSelectedColor}
-							onSizeChange={setSelectedSize}
-						/>
-						{selectedVariant && <p>Stock Available: {selectedVariant.stock}</p>}
+					{product.type === "fashion" && (
+						<div className={styles.variantContainer}>
+							<VariantSelector
+								variants={product.variants}
+								selectedColor={selectedColor}
+								selectedSize={selectedSize}
+								onColorChange={setSelectedColor}
+								onSizeChange={setSelectedSize}
+							/>
+						</div>
+					)}
+
+					<div className={styles.stockContainer}>
+						<p>
+							{activeVariant?.stock === 0
+								? "Out of Stock"
+								: `${activeVariant?.stock} units available`}
+						</p>
 					</div>
 
 					<div className={styles.quantityContainer}>
 						<QuantityPicker
 							quantity={quantity}
-							maxQuantity={selectedVariant?.stock ?? 0}
+							maxQuantity={activeVariant?.stock ?? 0}
 							onChange={setQuantity}
 						/>
 					</div>
 
 					<button
 						className={styles.addToCart}
-						disabled={!selectedVariant || selectedVariant.stock === 0}
+						disabled={!activeVariant || activeVariant.stock === 0}
 						onClick={handleAddToCart}>
-						{selectedVariant?.stock === 0 ? "Sold Out" : "Add To Cart"}
+						{activeVariant?.stock === 0
+							? "Sold Out"
+							: existingQuantity > 0
+								? `Add More (${existingQuantity} in Cart)`
+								: "Add To Cart"}
 					</button>
 				</section>
 			</main>
 		</>
 	);
-};
+}
 
 export default ProductDetailPage;

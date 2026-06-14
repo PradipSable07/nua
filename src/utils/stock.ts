@@ -1,3 +1,4 @@
+
 import type { StockStatus } from "../types/product";
 
 export function getStockStatus(

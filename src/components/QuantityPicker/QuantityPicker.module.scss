@@ -1,0 +1,41 @@
+@use "../../styles/variables" as *;
+
+.wrapper {
+  display: flex;
+
+  align-items: center;
+
+  width: fit-content;
+
+  border: 1px solid $color-border;
+
+  border-radius: $radius-md;
+
+  overflow: hidden;
+}
+
+.wrapper button {
+  width: 48px;
+  height: 48px;
+
+  border: none;
+
+  background: white;
+
+  cursor: pointer;
+
+  font-size: 20px;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.wrapper span {
+  width: 56px;
+
+  text-align: center;
+
+  font-weight: 600;
+}

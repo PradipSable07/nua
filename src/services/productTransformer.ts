@@ -58,14 +58,14 @@ function generateVariants(productId: number) {
 
   for (const color of COLORS) {
     for (const size of SIZES) {
+      const stock =
+        (productId * color.length * size.length) % 12;
+
       variants.push({
         id: `${productId}-${color}-${size}`,
-
         color,
-
         size,
-
-        stock: Math.floor(Math.random() * 12),
+        stock,
       });
     }
   }
